@@ -10,6 +10,8 @@ POSITION_ORDERING = np.asarray(
 
 parser = ap.ArgumentParser("Generate Softball Rosters")
 parser.add_argument('file', help="Today's roster file to load")
+parser.add_argument('-ve', '--verbose', action='store_true', help="Print out \
+        decision process")
 args = parser.parse_args()
 
 #Load the data set
