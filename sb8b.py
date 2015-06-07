@@ -61,7 +61,7 @@ for inning in range(INNINGS):
             print(inning_players.sort(pos))
         lucky_ix = inning_players[pos].argmin()
         lineup[i] = inning_players.ix[lucky_ix]['PLAYER']
-        if args.verbose: print("Chose %s")%lineup[i]
+        if args.verbose: print("Chose %s\n")%lineup[i]
         inning_players = inning_players.drop(lucky_ix)
     #Make it print prettier
     lineout = pa.Series(dict(zip(lineup,POSITION_ORDERING)))
