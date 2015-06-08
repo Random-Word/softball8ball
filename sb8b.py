@@ -11,13 +11,30 @@ POSITION_ORDERING = np.asarray(
 parser = ap.ArgumentParser("Generate Softball Rosters")
 parser.add_argument('file', help="Today's roster file to load")
 parser.add_argument('-ve', '--verbose', action='store_true', help="Print out \
-        decision process")
+        decision process.")
+parser.add_argument('-pr', '--printranks', action='store_true', help="Print out\
+         rankings for current roster.")
+parser.add_argument('-al', '--algorithm', default="pos_rank_chooser", help="The \
+        selection algorithm to use.")
 args = parser.parse_args()
+
+def pos_rank_chooser(fielded_players, i, pos):
+    lucky_ix = fielded_players[pos].sort(('SEASONS','SKILL'),inplace=False).argmin()
+    lineup[i] = fielded_players.ix[lucky_ix]['PLAYER']
+    return lucky_ix
+
+def skill_chooser(fielded_players, i):
+    lucky_ix = fielded_players['SKILL'].argmin()
+    lineup[i] = fielded_players.ix[lucky_ix]['PLAYER']
+    return lucky_ix
 
 #Load the data set
 ranks = pa.read_csv('ranks.csv')
 players = np.loadtxt(args.file)
 ranks = ranks.iloc[players]
+if args.printranks:
+    print(ranks)
+    quit()
 
 #Decide if we'll have 8 or 9 positions based on the number of female players
 fp = ranks[ranks['SEX']=='F']
@@ -60,12 +77,17 @@ for inning in range(INNINGS):
             print("Choosing %s"%pos)
             print(inning_players.sort(pos))
         #Find our winner, trying to account for seasons and skill
-        lucky_ix = inning_players[pos].sort(("SEASONS","SKILL"),inplace=False).argmin()
-        lineup[i] = inning_players.ix[lucky_ix]['PLAYER']
+        if args.algorithm == 'pos_rank_chooser':
+            lucky_ix = pos_rank_chooser(inning_players, i, pos)
+        elif args.algorithm == 'skill_chooser':
+            lucky_ix = skill_chooser(inning_players, i)
+        else:
+            print("Error: No valid algorithm chosen.")
         if args.verbose: print("Chose %s\n")%lineup[i]
         inning_players = inning_players.drop(lucky_ix)
     #Make it print prettier
     lineout = pa.Series(dict(zip(lineup,POSITION_ORDERING)))
+    print("\nInning %d:"%(inning+1))
     print(lineout)
     #Let's make sure the same players don't sit on the bench all game
     m_mask = np.roll(m_mask,1)
