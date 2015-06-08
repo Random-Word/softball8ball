@@ -3,6 +3,7 @@
 import pandas as pa
 import argparse as ap
 import numpy as np
+import itertools as it
 
 INNINGS = 7
 POSITION_ORDERING = np.asarray(
@@ -10,13 +11,26 @@ POSITION_ORDERING = np.asarray(
 
 parser = ap.ArgumentParser("Generate Softball Rosters")
 parser.add_argument('file', help="Today's roster file to load")
-parser.add_argument('-ve', '--verbose', action='store_true', help="Print out \
-        decision process.")
+parser.add_argument('-ve', '--verbose', type=int, help="Set verbosity level \
+        for decision process.")
 parser.add_argument('-pr', '--printranks', action='store_true', help="Print out\
          rankings for current roster.")
 parser.add_argument('-al', '--algorithm', default="pos_rank_chooser", help="The \
         selection algorithm to use.")
 args = parser.parse_args()
+
+def roundrobin(*iterables):
+    "roundrobin('ABC', 'D', 'EF') --> A D E B F C"
+    # Recipe credited to George Sakkis
+    pending = len(iterables)
+    nexts = it.cycle(iter(it).next for it in iterables)
+    while pending:
+        try:
+            for next in nexts:
+                yield next()
+        except StopIteration:
+            pending -= 1
+            nexts = it.cycle(it.islice(nexts, pending))
 
 def pos_rank_chooser(fielded_players, i, pos):
     lucky_ix = fielded_players[pos].sort(('SEASONS','SKILL'),inplace=False).argmin()
@@ -27,6 +41,12 @@ def skill_chooser(fielded_players, i):
     lucky_ix = fielded_players['SKILL'].argmin()
     lineup[i] = fielded_players.ix[lucky_ix]['PLAYER']
     return lucky_ix
+
+def generate_benched(players_fielded, total_players):
+    trues = [True]*players_fielded
+    falses = [False]*(total_players-players_fielded)
+    return list(roundrobin(trues,falses))
+#    return np.random.permutation(mask)
 
 #Load the data set
 ranks = pa.read_csv('ranks.csv')
@@ -61,8 +81,11 @@ fp.index = np.random.permutation(fp.index)
 mp.index = np.random.permutation(mp.index)
 
 #Generate the benched mask
-m_mask = [True]*num_mpp+[False]*(num_mp-num_mpp)
-f_mask = [True]*num_fpp+[False]*(num_fp-num_fpp)
+m_mask = generate_benched(num_mpp, num_mp)
+f_mask = generate_benched(num_fpp, num_fp)
+
+print(m_mask)
+print(f_mask)
 
 #Let's make a lineup for every inning
 for inning in range(INNINGS):
@@ -72,8 +95,10 @@ for inning in range(INNINGS):
     #the positions importance. This is a terrible solution, but we'll make
     #a better one later if it's necessary.
     inning_players = ranks.ix[np.append(fem_idx,mal_idx)]
+    if args.verbose > 0:
+        print(inning_players)
     for i, pos in enumerate(POSITION_ORDERING):
-        if (args.verbose):
+        if (args.verbose > 2):
             print("Choosing %s"%pos)
             print(inning_players.sort(pos))
         #Find our winner, trying to account for seasons and skill
@@ -83,7 +108,7 @@ for inning in range(INNINGS):
             lucky_ix = skill_chooser(inning_players, i)
         else:
             print("Error: No valid algorithm chosen.")
-        if args.verbose: print("Chose %s\n")%lineup[i]
+        if args.verbose > 1: print("Chose %s\n")%lineup[i]
         inning_players = inning_players.drop(lucky_ix)
     #Make it print prettier
     lineout = pa.Series(dict(zip(lineup,POSITION_ORDERING)))
