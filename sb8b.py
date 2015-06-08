@@ -15,7 +15,7 @@ parser.add_argument('-ve', '--verbose', type=int, help="Set verbosity level \
         for decision process.")
 parser.add_argument('-pr', '--printranks', action='store_true', help="Print out\
          rankings for current roster.")
-parser.add_argument('-al', '--algorithm', default="pos_rank_chooser", help="The \
+parser.add_argument('-al', '--algorithm', default="skill_chooser", help="The \
         selection algorithm to use.")
 args = parser.parse_args()
 
