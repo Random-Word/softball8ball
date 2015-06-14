@@ -74,7 +74,7 @@ if num_mp != num_mpp:
 else:
     m_mask = [True]*num_mp
 if num_fp != num_fpp:
-    f_mask = [False if i%np.floor(num_fp/(num_fp-num_fpp))==(num_fp)%2 else True for i in
+    f_mask = [False if i%np.floor(num_fp/(num_fp-num_fpp))==(num_fp%2) else True for i in
         range(num_fp)]
 else:
     f_mask = [True]*num_fp
