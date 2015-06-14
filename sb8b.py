@@ -25,7 +25,8 @@ def pos_weight_chooser(fielded_players, i, pos):
     return lucky_ix
 
 def pos_rank_chooser(fielded_players, i, pos):
-    lucky_ix = fielded_players[pos].sort(('SEASONS','SKILL'),inplace=False).argmin()
+    lucky_ix = fielded_players[pos].sort(('SEASONS','SKILL'),
+            inplace=False).argmax()
     lineup[i] = fielded_players.ix[lucky_ix]['PLAYER']
     return lucky_ix
 
