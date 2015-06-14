@@ -19,19 +19,6 @@ parser.add_argument('-al', '--algorithm', default="skill_chooser", help="The \
         selection algorithm to use.")
 args = parser.parse_args()
 
-def roundrobin(*iterables):
-    "roundrobin('ABC', 'D', 'EF') --> A D E B F C"
-    # Recipe credited to George Sakkis
-    pending = len(iterables)
-    nexts = it.cycle(iter(it).next for it in iterables)
-    while pending:
-        try:
-            for next in nexts:
-                yield next()
-        except StopIteration:
-            pending -= 1
-            nexts = it.cycle(it.islice(nexts, pending))
-
 def pos_rank_chooser(fielded_players, i, pos):
     lucky_ix = fielded_players[pos].sort(('SEASONS','SKILL'),inplace=False).argmin()
     lineup[i] = fielded_players.ix[lucky_ix]['PLAYER']
@@ -41,12 +28,6 @@ def skill_chooser(fielded_players, i):
     lucky_ix = fielded_players['SKILL'].argmin()
     lineup[i] = fielded_players.ix[lucky_ix]['PLAYER']
     return lucky_ix
-
-def generate_benched(players_fielded, total_players):
-    trues = [True]*players_fielded
-    falses = [False]*(total_players-players_fielded)
-    return list(roundrobin(trues,falses))
-#    return np.random.permutation(mask)
 
 #Load the data set
 ranks = pa.read_csv('ranks.csv')
@@ -81,11 +62,19 @@ fp.index = np.random.permutation(fp.index)
 mp.index = np.random.permutation(mp.index)
 
 #Generate the benched mask
-m_mask = generate_benched(num_mpp, num_mp)
-f_mask = generate_benched(num_fpp, num_fp)
+if num_mp != num_mpp:
+    m_mask = [False if i%np.floor(num_mp/(num_mp-num_mpp))==0 else True for i in
+        range(num_mp)]
+else:
+    m_mask = [True]*num_mp
+if num_fp != num_fpp:
+    f_mask = [False if i%np.floor(num_fp/(num_fp-num_fpp))==0 else True for i in
+        range(num_fp)]
+else:
+    f_mask = [True]*num_fp
 
-print(m_mask)
-print(f_mask)
+assert sum(m_mask) == num_mpp
+assert sum(f_mask) == num_fpp
 
 #Let's make a lineup for every inning
 for inning in range(INNINGS):
