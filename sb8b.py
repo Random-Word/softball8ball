@@ -43,6 +43,8 @@ mp = ranks[ranks['SEX']=='M']
 num_fp = len(fp.index)
 num_mp = len(mp.index)
 
+assert num_fp >= 2
+
 if num_fp >= 3:
     positions = 9.0
 else:
@@ -53,8 +55,12 @@ lineup = [None]*int(positions)
 
 #Decide how many of each gender will play in each inning
 playing_ratio = positions/(num_fp+num_mp)
-num_fpp = np.ceil(playing_ratio*num_fp)
-num_mpp = np.floor(playing_ratio*num_mp)
+if num_fp >= 3:
+    num_fpp = np.floor(playing_ratio*num_fp)
+    num_mpp = np.ceil(playing_ratio*num_mp)
+else:
+    num_fpp = 2
+    num_mpp = positions-num_fpp
 assert(num_fpp+num_mpp==positions)
 
 #Shuffle player numbers within genders
@@ -63,15 +69,21 @@ mp.index = np.random.permutation(mp.index)
 
 #Generate the benched mask
 if num_mp != num_mpp:
-    m_mask = [False if i%np.floor(num_mp/(num_mp-num_mpp))==0 else True for i in
+    m_mask = [False if i%max(2,np.floor(num_mp/(num_mp-num_mpp)))==(num_mp%2) else True for i in
         range(num_mp)]
 else:
     m_mask = [True]*num_mp
 if num_fp != num_fpp:
-    f_mask = [False if i%np.floor(num_fp/(num_fp-num_fpp))==0 else True for i in
+    f_mask = [False if i%np.floor(num_fp/(num_fp-num_fpp))==(num_fp)%2 else True for i in
         range(num_fp)]
 else:
     f_mask = [True]*num_fp
+
+if args.verbose > 0:
+    print(num_mpp)
+    print(m_mask)
+    print(num_fpp)
+    print(f_mask)
 
 assert sum(m_mask) == num_mpp
 assert sum(f_mask) == num_fpp
