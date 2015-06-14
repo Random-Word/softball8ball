@@ -6,22 +6,26 @@ import numpy as np
 import itertools as it
 
 INNINGS = 7
-POSITION_ORDERING = np.asarray(
-        ['SS', 'SB', 'LF', 'FB', 'TB', 'CF', 'RF', 'RV','CA'])
+POSITION_ORDERING = np.asarray(['1B','2B','3B','C','SS','RF','RC','LC','LF'])
+#        ['SS', 'SB', 'LF', 'FB', 'TB', 'CF', 'RF', 'RV','CA'])
 
 parser = ap.ArgumentParser("Generate Softball Rosters")
 parser.add_argument('file', help="Today's roster file to load")
 parser.add_argument('-ve', '--verbose', type=int, help="Set verbosity level \
         for decision process.")
-parser.add_argument('-pr', '--printranks', action='store_true', help="Print out\
+parser.add_argument('-pr', '--printweights', action='store_true', help="Print out\
          rankings for current roster.")
-parser.add_argument('-al', '--algorithm', default="skill_chooser", help="The \
+parser.add_argument('-al', '--algorithm', default="pos_weight_chooser", help="The \
         selection algorithm to use.")
 args = parser.parse_args()
 
-def pos_rank_chooser(fielded_players, i, pos):
-    # lucky_ix = fielded_players[pos].sort(('SEASONS','SKILL'),inplace=False).argmin()
+def pos_weight_chooser(fielded_players, i, pos):
     lucky_ix = fielded_players[pos].argmax()
+    lineup[i] = fielded_players.ix[lucky_ix]['PLAYER']
+    return lucky_ix
+
+def pos_rank_chooser(fielded_players, i, pos):
+    lucky_ix = fielded_players[pos].sort(('SEASONS','SKILL'),inplace=False).argmin()
     lineup[i] = fielded_players.ix[lucky_ix]['PLAYER']
     return lucky_ix
 
@@ -31,17 +35,16 @@ def skill_chooser(fielded_players, i):
     return lucky_ix
 
 #Load the data set
-ranks = pa.read_csv('ranks.csv')
 weights = pa.read_csv('player_weights.csv')
 players = np.loadtxt(args.file)
-ranks = ranks.iloc[players]
-if args.printranks:
-    print(ranks)
+weights = weights.iloc[players]
+if args.printweights:
+    print(weights)
     quit()
 
 #Decide if we'll have 8 or 9 positions based on the number of female players
-fp = ranks[ranks['SEX']=='F']
-mp = ranks[ranks['SEX']=='M']
+fp = weights[weights['SEX']=='F']
+mp = weights[weights['SEX']=='M']
 num_fp = len(fp.index)
 num_mp = len(mp.index)
 
@@ -97,7 +100,7 @@ for inning in range(INNINGS):
     #Let's greedily choose the best player for each position in order of
     #the positions importance. This is a terrible solution, but we'll make
     #a better one later if it's necessary.
-    inning_players = ranks.ix[np.append(fem_idx,mal_idx)]
+    inning_players = weights.ix[np.append(fem_idx,mal_idx)]
     if args.verbose > 0:
         print(inning_players)
     for i, pos in enumerate(POSITION_ORDERING):
@@ -107,6 +110,8 @@ for inning in range(INNINGS):
         #Find our winner, trying to account for seasons and skill
         if args.algorithm == 'pos_rank_chooser':
             lucky_ix = pos_rank_chooser(inning_players, i, pos)
+        elif args.algorithm == 'pos_weight_chooser':
+            lucky_ix = pos_weight_chooser(inning_players, i, pos)
         elif args.algorithm == 'skill_chooser':
             lucky_ix = skill_chooser(inning_players, i)
         else:
