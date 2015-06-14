@@ -20,7 +20,8 @@ parser.add_argument('-al', '--algorithm', default="skill_chooser", help="The \
 args = parser.parse_args()
 
 def pos_rank_chooser(fielded_players, i, pos):
-    lucky_ix = fielded_players[pos].sort(('SEASONS','SKILL'),inplace=False).argmin()
+    # lucky_ix = fielded_players[pos].sort(('SEASONS','SKILL'),inplace=False).argmin()
+    lucky_ix = fielded_players[pos].argmax()
     lineup[i] = fielded_players.ix[lucky_ix]['PLAYER']
     return lucky_ix
 
@@ -31,6 +32,7 @@ def skill_chooser(fielded_players, i):
 
 #Load the data set
 ranks = pa.read_csv('ranks.csv')
+weights = pa.read_csv('player_weights.csv')
 players = np.loadtxt(args.file)
 ranks = ranks.iloc[players]
 if args.printranks:
