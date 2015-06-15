@@ -60,11 +60,11 @@ lineup = [None]*int(positions)
 
 #Decide how many of each gender will play in each inning
 playing_ratio = positions/(num_fp+num_mp)
-if num_fp >= 3:
+if num_fp > 3:
 	num_fpp = np.floor(playing_ratio*num_fp)
 	num_mpp = np.ceil(playing_ratio*num_mp)
 else:
-	num_fpp = 2
+	num_fpp = num_fp
 	num_mpp = positions-num_fpp
 assert(num_fpp+num_mpp==positions)
 
