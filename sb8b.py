@@ -74,8 +74,13 @@ mp.index = np.random.permutation(mp.index)
 
 #Generate the benched mask
 if num_mp != num_mpp:
-	m_mask = [False if i%max(2,np.floor(num_mp/(num_mp-num_mpp)))==(num_mp%2) else True for i in
-		range(num_mp)]
+    m_mask = [False if i%max(2,np.floor(num_mp/(num_mp-num_mpp)))==(num_mp%2) else True for i in
+        range(num_mp)]
+    if sum(m_mask) < num_mpp:
+        i = 0
+        while sum(m_mask) < num_mpp:
+            m_mask[i] = True
+            i+=1
 else:
 	m_mask = [True]*num_mp
 if num_fp != num_fpp:
