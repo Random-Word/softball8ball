@@ -35,7 +35,7 @@ def skill_chooser(fielded_players, i):
 	return lucky_ix
 
 #Load the data set
-weights = pa.read_csv('player_weights.csv')
+weights = pa.read_csv('/softball8ball/player_weights.csv')
 players = np.loadtxt(args.file)
 weights = weights.iloc[players]
 if args.printweights:
@@ -134,7 +134,7 @@ for inning in range(INNINGS):
 	f_mask = np.roll(f_mask,1)
 
 
-output_f = open("lineup_output.csv", "w+")
+output_f = open("/softball8ball/lineup_output.csv", "w+")
 output_f.write(",".join(["Position", "Inning 1","Inning 2","Inning 3","Inning 4","Inning 5","Inning 6","Inning 7", "\n"]))
 for p in POSITION_ORDERING:
 	players = [p]
