@@ -1,13 +1,20 @@
-0
-1
-2
-3
-4
-6
-7
-8
-11
-12
-14
-15
-16
+{
+"Redden": (0, 1),
+"Seaward": (1, 1),
+"Walker": (2, 1),
+"McLeod": (3, 1),
+"MacDonald": (4, 1),
+"McEchearn": (5, 1),
+"Chisholm": (6, 1),
+"Saqib": (7, 1),
+"Perry": (8, 1),
+"Dorsett": (9, 0),
+"Hilchey": (10, 1),
+"Mulle": (11, 1),
+"Gray": (12, 1),
+"Chun": (13, 1),
+"Scavella": (14, 0),
+"Wheeler": (15, 1),
+"Bance": (16, 0),
+"Kavyavi": (17, 1)
+}

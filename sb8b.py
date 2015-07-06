@@ -5,6 +5,7 @@ import argparse as ap
 import numpy as np
 import itertools as it
 
+
 INNINGS = 7
 POSITION_ORDERING = np.asarray(['SS', 'LC', 'RC', 'SB', 'LF', 'FB', 'RF', 'TB','CA'])  # import thang and use
 
@@ -34,9 +35,41 @@ def skill_chooser(fielded_players, i):
 	lineup[i] = fielded_players.ix[lucky_ix]['PLAYER']
 	return lucky_ix
 
+# def indexed_roster_from_names(named_roster):
+# 	players_by_index = {
+# 	"Redden": 0,
+# 	"Seaward": 1,
+# 	"Walker": 2,
+# 	"McLeod": 3,
+# 	"MacDonald": 4,
+# 	"McEchearn": 5,
+# 	"Chisholm": 6,
+# 	"Saqib": 7,
+# 	"Perry": 8,
+# 	"Dorsett": 9,
+# 	"Hilchey": 10,
+# 	"Mulle": 11,
+# 	"Gray": 12,
+# 	"Chun": 13,
+# 	"Scavella": 14,
+# 	"Wheeler": 15,
+# 	"Bance": 16,
+# 	"Kavyavi": 17}
+#
+# 	indexed_roster = []
+#
+# 	for name in named_roster:
+# 		if name
+
 #Load the data set
 weights = pa.read_csv('/softball8ball/player_weights.csv')
-players = np.loadtxt(args.file)
+players_by_name = eval(open(args.file).read())
+players = []
+for player in players_by_name:
+	if players_by_name[player][1] == 1:
+		players.append(players_by_name[player][0])
+# players = np.loadtxt(args.file)
+
 weights = weights.iloc[players]
 if args.printweights:
 	print(weights)
